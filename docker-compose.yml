@@ -1,0 +1,39 @@
+version: '3.1'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+
+  redis:
+    image: 'bitnami/redis:latest'
+    restart: always
+    hostname: redis.docker
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  worker:
+    image: worker
+    depends_on:
+        - redis
+    environment:
+      REDIS: redis
+    volumes:
+      - ./tf:/tf-worker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
