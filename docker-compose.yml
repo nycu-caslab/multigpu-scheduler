@@ -15,6 +15,15 @@ services:
     image: adminer
     restart: always
 
+  main-controller:
+    image: controller
+    volumes:
+      - ./main-controller:/main-controller
+    depends_on:
+      - redis
+    environment:
+      REDIS: redis
+
   redis:
     image: 'bitnami/redis:latest'
     restart: always
@@ -25,7 +34,7 @@ services:
   worker:
     image: worker
     depends_on:
-        - redis
+      - redis
     environment:
       REDIS: redis
     volumes:

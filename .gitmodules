@@ -1,3 +1,6 @@
 [submodule "tf-worker"]
 	path = tf-worker
 	url = https://github.com/nycu-caslab/tf-worker
+[submodule "main-controller"]
+	path = main-controller
+	url = https://github.com/nycu-caslab/main-controller
