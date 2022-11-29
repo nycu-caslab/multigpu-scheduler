@@ -20,23 +20,50 @@ services:
     volumes:
       - ./main-controller:/main-controller
     depends_on:
-      - redis
+      - redis0
+      - redis1
     environment:
-      REDIS: redis
+      REDIS0: redis0
+      REDIS1: redis1
 
-  redis:
+  redis0:
     image: 'bitnami/redis:latest'
     restart: always
-    hostname: redis.docker
+    hostname: redis0.docker
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
-  worker:
+  worker0:
     image: worker
     depends_on:
-      - redis
+      - redis0
     environment:
-      REDIS: redis
+      REDIS: redis0
+      CUDA_VISIBLE_DEVICES: 0
+    volumes:
+      - ./tf-worker:/tf-worker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  redis1:
+    image: 'bitnami/redis:latest'
+    restart: always
+    hostname: redis1.docker
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
+  worker1:
+    image: worker
+    depends_on:
+      - redis1
+    environment:
+      REDIS: redis1
+      CUDA_VISIBLE_DEVICES: 1
     volumes:
       - ./tf-worker:/tf-worker
     deploy:
