@@ -5,26 +5,36 @@ networks:
     driver: bridge
 
 services:
-  db:
-    image: mariadb
-    restart: always
-    environment:
-      MARIADB_ROOT_PASSWORD: example
+  # mongo:
+  #   image: mongo
+  #   restart: always
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: example
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
 
   adminer:
     image: adminer
     restart: always
 
   main-controller:
-    image: controller
+    image: ubuntu
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt update && apt -y install make libhiredis-dev g++ && cd /main-controller && make docker && ./controller"
     volumes:
       - ./main-controller:/main-controller
     depends_on:
       - redis0
-      - redis1
     environment:
       REDIS0: redis0
-      REDIS1: redis1
 
   redis0:
     image: 'bitnami/redis:latest'
@@ -34,36 +44,13 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
 
   worker0:
-    image: worker
+    image: floopcz/tensorflow_cc:ubuntu-cuda
     depends_on:
       - redis0
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt -y install libhiredis-dev && cd /tf-worker && make docker && /tf-worker/worker"
     environment:
       REDIS: redis0
       CUDA_VISIBLE_DEVICES: 0
-    volumes:
-      - ./tf-worker:/tf-worker
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-  redis1:
-    image: 'bitnami/redis:latest'
-    restart: always
-    hostname: redis1.docker
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-
-  worker1:
-    image: worker
-    depends_on:
-      - redis1
-    environment:
-      REDIS: redis1
-      CUDA_VISIBLE_DEVICES: 1
     volumes:
       - ./tf-worker:/tf-worker
     deploy:
