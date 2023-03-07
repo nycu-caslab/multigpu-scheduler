@@ -25,17 +25,11 @@ services:
   exclusive-mode:
     image: debian:stretch-slim
     command: nvidia-smi -c EXCLUSIVE_PROCESS
-    # https://github.com/nvidia/nvidia-container-runtime#environment-variables-oci-spec
-    # NVIDIA_VISIBLE_DEVICES will default to "all" (from file .env), unless
-    # the variable is exported on the command-line.
     environment:
       - "NVIDIA_VISIBLE_DEVICES"
       - "NVIDIA_DRIVER_CAPABILITIES=utility"
     runtime: nvidia
     network_mode: none
-    # CAP_SYS_ADMIN is required to modify the compute mode of the GPUs.
-    # This capability is granted only to this ephemeral container, not to
-    # the MPS daemon.
     cap_add:
       - SYS_ADMIN
 
@@ -43,12 +37,6 @@ services:
     image: nvidia/mps
     container_name: mps-daemon
     restart: on-failure
-    # The "depends_on" only guarantees an ordering for container *start*:
-    # https://docs.docker.com/compose/startup-order/
-    # There is a potential race condition: the MPS or CUDA containers might
-    # start before the exclusive compute mode is set. If this happens, one
-    # of the CUDA application will fail to initialize since MPS will not be
-    # the single point of arbitration for GPU access.
     depends_on:
       - exclusive-mode
     environment:
@@ -60,11 +48,6 @@ services:
       memlock:
         soft: -1
         hard: -1
-    # The MPS control daemon, the MPS server, and the associated MPS
-    # clients communicate with each other via named pipes and UNIX domain
-    # sockets. The default directory for these pipes and sockets is
-    # /tmp/nvidia-mps.
-    # Here we share a tmpfs between the applications and the MPS daemon.
     volumes:
       - nvidia_mps:/tmp/nvidia-mps
 
@@ -91,6 +74,13 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
+  redis1:
+    image: 'bitnami/redis:latest'
+    restart: always
+    hostname: redis1.docker
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
   worker0:
     image: floopcz/tensorflow_cc:ubuntu-cuda
     depends_on:
@@ -98,9 +88,10 @@ services:
       - mps-daemon
     command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt -y install libhiredis-dev && cd /tf-worker && make docker && /worker"
     environment:
-      REDIS: redis0
-      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 50%
-      CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
+      REDIS0: redis0
+      REDIS1: redis1
+      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 40%
+      # CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
     ipc: container:mps-daemon
     volumes:
       - ./tf-worker:/tf-worker
@@ -114,38 +105,8 @@ services:
               count: 1
               capabilities: [gpu]
 
-  redis1:
-    image: 'bitnami/redis:latest'
-    restart: always
-    hostname: redis1.docker
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-  worker1:
-    image: floopcz/tensorflow_cc:ubuntu-cuda
-    depends_on:
-      - redis1
-      - mps-daemon
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt -y install libhiredis-dev && cd /tf-worker && make docker && /worker"
-    environment:
-      REDIS: redis1
-      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 50%
-      CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
-    ipc: container:mps-daemon
-    volumes:
-      - ./tf-worker:/tf-worker
-      - nvidia_mps:/tmp/nvidia-mps
-      - /tmp/nvidia-log:/nvidia-log
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-  
 volumes:
     nvidia_mps:
         driver_opts:
             type: tmpfs
             device: tmpfs
-
