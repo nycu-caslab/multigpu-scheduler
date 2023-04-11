@@ -63,9 +63,11 @@ services:
     depends_on:
       - redis0
       - redis1
+      - redis_done
     environment:
       REDIS0: redis0
       REDIS1: redis1
+      REDISDONE: redis_done
 
   redis0:
     image: 'bitnami/redis:latest'
@@ -81,16 +83,26 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
+  redis_done:
+    image: 'bitnami/redis:latest'
+    restart: always
+    hostname: redis_done.docker
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+
   worker0:
     image: worker
     depends_on:
       - redis0
+      - redis1
+      - redis_done
       - mps-daemon
     command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
     environment:
       REDIS0: redis0
       REDIS1: redis1
-      CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 40%
+      REDISDONE: redis_done
+      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 40%
       # CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
     ipc: container:mps-daemon
     volumes:
