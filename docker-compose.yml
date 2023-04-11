@@ -51,13 +51,13 @@ services:
     volumes:
       - nvidia_mps:/tmp/nvidia-mps
 
-  adminer:
-    image: adminer
-    restart: always
+  # adminer:
+  #   image: adminer
+  #   restart: always
 
   main-controller:
-    image: ubuntu
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt update && apt -y install make libhiredis-dev g++ && cd /main-controller && make docker && ./controller"
+    image: controller
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /main-controller && make docker && ./controller"
     volumes:
       - ./main-controller:/main-controller
     depends_on:
@@ -82,15 +82,15 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
 
   worker0:
-    image: floopcz/tensorflow_cc:ubuntu-cuda
+    image: worker
     depends_on:
       - redis0
       - mps-daemon
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && apt -y install libhiredis-dev && cd /tf-worker && make docker && tail -f /dev/null && /worker"
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
     environment:
       REDIS0: redis0
       REDIS1: redis1
-      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 40%
+      CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 40%
       # CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
     ipc: container:mps-daemon
     volumes:
