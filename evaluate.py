@@ -3,7 +3,7 @@ def main():
     e = list()
     while True:
         try:
-            start, end = tuple(map(int, input().split()))
+            start, end= tuple(map(int, input().split()))[:2]
             s.append(start)
             e.append(end)
             s.sort()
