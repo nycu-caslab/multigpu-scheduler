@@ -5,23 +5,6 @@ networks:
     driver: bridge
 
 services:
-  # mongo:
-  #   image: mongo
-  #   restart: always
-  #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: root
-  #     MONGO_INITDB_ROOT_PASSWORD: example
-
-  # mongo-express:
-  #   image: mongo-express
-  #   restart: always
-  #   ports:
-  #     - 8081:8081
-  #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: example
-  #     ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
-
   exclusive-mode:
     image: debian:stretch-slim
     command: nvidia-smi -c EXCLUSIVE_PROCESS
@@ -51,10 +34,6 @@ services:
     volumes:
       - nvidia_mps:/tmp/nvidia-mps
 
-  # adminer:
-  #   image: adminer
-  #   restart: always
-
   main-controller:
     image: controller
     command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /main-controller && make docker && ./controller"
@@ -62,12 +41,8 @@ services:
       - ./main-controller:/main-controller
     depends_on:
       - redis0
-      - redis1
-      - redis_done
     environment:
-      REDIS0: redis0
-      REDIS1: redis1
-      REDISDONE: redis_done
+      REDIS: redis0
 
   redis0:
     image: 'bitnami/redis:latest'
@@ -76,34 +51,14 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
-  redis1:
-    image: 'bitnami/redis:latest'
-    restart: always
-    hostname: redis1.docker
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-
-  redis_done:
-    image: 'bitnami/redis:latest'
-    restart: always
-    hostname: redis_done.docker
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-
   worker0:
     image: worker
     depends_on:
       - redis0
-      - redis1
-      - redis_done
       - mps-daemon
     command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
     environment:
-      REDIS0: redis0
-      REDIS1: redis1
-      REDISDONE: redis_done
-      # CUDA_MPS_ACTIVE_THREAD_PERCENTAGE: 10%
-      # CUDA_MPS_PINNED_DEVICE_MEM_LIMIT: 0=15G
+      REDIS: redis0
     ipc: container:mps-daemon
     volumes:
       - ./tf-worker:/tf-worker
