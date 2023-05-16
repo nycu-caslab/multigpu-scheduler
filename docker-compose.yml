@@ -43,6 +43,7 @@ services:
       - redis0
     environment:
       REDIS: redis0
+      CASE: 0
 
   redis0:
     image: 'bitnami/redis:latest'
@@ -61,6 +62,7 @@ services:
     # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && nvidia-smi && cd /tf-worker && rm -f log.txt && tail -f /dev/null"
     environment:
       REDIS: redis0
+      CASE: 0
       WORKER0: 80%
       WORKER1: 20%
     ipc: container:mps-daemon
