@@ -57,9 +57,12 @@ services:
       - redis0
       - mps-daemon
     # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -f log.txt && ./build/main"
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && nvidia-smi && cd /tf-worker && rm -f log.txt && ./build/main"
+    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && nvidia-smi && cd /tf-worker && rm -f log.txt && tail -f /dev/null"
     environment:
       REDIS: redis0
+      WORKER0: 80%
+      WORKER1: 20%
     ipc: container:mps-daemon
     volumes:
       - ./tf-worker:/tf-worker
