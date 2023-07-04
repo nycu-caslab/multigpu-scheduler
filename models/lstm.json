@@ -1,0 +1,17 @@
+{
+  "name": "lstm",
+  "input_shape": [
+    32,
+    3,
+    50176
+  ],
+  "layers": [
+    {
+      "type": "lstm",
+      "params": {
+        "input_size": 50176,
+        "hidden_size": 10
+      }
+    }
+  ]
+}

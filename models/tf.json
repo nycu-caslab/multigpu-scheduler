@@ -1,0 +1,17 @@
+{
+  "name": "tf",
+  "input_shape": [
+    64,
+    32,
+    512
+  ],
+  "layers": [
+    {
+      "type": "tf",
+      "params": {
+        "d_model": 512,
+        "nhead": 8
+      }
+    }
+  ]
+}

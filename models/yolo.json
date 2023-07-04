@@ -1,0 +1,186 @@
+{
+  "name": "yolo",
+  "input_shape": [
+    32,
+    3,
+    416,
+    416
+  ],
+  "layers": [
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 3,
+        "out_channels": 16,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "maxpool",
+      "params": {
+        "ksize": 2,
+        "kstride": 2
+      }
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 16,
+        "out_channels": 32,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "maxpool",
+      "params": {
+        "ksize": 2,
+        "kstride": 2
+      }
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 32,
+        "out_channels": 64,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "maxpool",
+      "params": {
+        "ksize": 2,
+        "kstride": 2
+      }
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 64,
+        "out_channels": 128,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "maxpool",
+      "params": {
+        "ksize": 2,
+        "kstride": 2
+      }
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 128,
+        "out_channels": 256,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "maxpool",
+      "params": {
+        "ksize": 2,
+        "kstride": 2
+      }
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 256,
+        "out_channels": 512,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 512,
+        "out_channels": 1024,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 1024,
+        "out_channels": 256,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 256,
+        "out_channels": 512,
+        "filter_size": 3,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    },
+    {
+      "type": "conv",
+      "params": {
+        "in_channels": 512,
+        "out_channels": 255,
+        "filter_size": 1,
+        "stride": 1,
+        "padding": 1
+      }
+    },
+    {
+      "type": "relu",
+      "params": {}
+    }
+  ]
+}

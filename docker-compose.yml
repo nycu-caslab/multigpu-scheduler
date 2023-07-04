@@ -36,7 +36,7 @@ services:
 
   main-controller:
     image: controller
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /main-controller && make docker && rm -f log.txt && ./controller"
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /main-controller && make docker && rm -f log.txt && ./controller && tail +3 log.txt | python3 parse.py && curl -s -X POST https://api.telegram.org/bot5875600379:AAF9Y0zx7qYrAaE2ZTIpdIPDJ-Fk70OHQkM/sendMessage -d chat_id=478970169 -d text="Done""
     volumes:
       - ./main-controller:/main-controller
     depends_on:
@@ -57,12 +57,10 @@ services:
     depends_on:
       - redis0
       - mps-daemon
-    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && nvidia-smi && cd /tf-worker && rm -f log.txt && ./build/main"
-    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && nvidia-smi && cd /tf-worker && rm -f log.txt && tail -f /dev/null"
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
+    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -f log.txt && ./build/main"
     environment:
       REDIS: redis0
-      CASE: 0
       WORKER0: 80%
       WORKER1: 20%
     ipc: container:mps-daemon
