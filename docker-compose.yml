@@ -57,12 +57,12 @@ services:
     depends_on:
       - redis0
       - mps-daemon
-    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
-    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -f log.txt && ./build/main"
+    command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -rf build && mkdir build && cd build && cmake -DCMAKE_PREFIX_PATH=/tf-worker/libtorch .. && cmake --build . --config Release && cd .. && rm -f log.txt && ./build/main"
+    # command: bash -c "echo nameserver 8.8.8.8 >> /etc/resolv.conf && cd /tf-worker && rm -f log.txt && ./build/main"
     environment:
       REDIS: redis0
-      WORKER0: 100%
-      WORKER1: 0%
+      WORKER0: 50%
+      WORKER1: 50%
     ipc: container:mps-daemon
     volumes:
       - ./tf-worker:/tf-worker
